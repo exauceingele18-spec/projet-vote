@@ -29,6 +29,9 @@
                 <button onclick="switchTab('candidates')" id="tab-candidates" class="px-4 py-2 text-sm font-medium rounded-lg text-slate-400 hover:text-slate-200 transition-all">
                     <i class="fa-solid fa-user-group mr-2"></i>Candidats
                 </button>
+                <button onclick="switchTab('voters')" id="tab-voters" class="px-4 py-2 text-sm font-medium rounded-lg text-slate-400 hover:text-slate-200 transition-all">
+                    <i class="fa-solid fa-address-card mr-2"></i>Électeurs autorisés
+                </button>
                 <button onclick="switchTab('fraud')" id="tab-fraud" class="px-4 py-2 text-sm font-medium rounded-lg text-slate-400 hover:text-slate-200 transition-all">
                     <i class="fa-solid fa-triangle-exclamation mr-2"></i>Journal de fraude
                 </button>
@@ -129,6 +132,38 @@
                 <div id="candidatesManageList" class="space-y-4"></div>
             </div>
 
+            <!-- Électeurs autorisés -->
+            <div id="panel-voters" class="hidden space-y-6">
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                    <h2 class="text-xl font-semibold text-white mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-address-card text-indigo-400"></i> Registre des électeurs autorisés
+                    </h2>
+                    <p class="text-xs text-slate-400 mb-4">
+                        Seuls les matricules présents dans ce registre peuvent voter. Il représente la liste des étudiants
+                        en règle avec leurs frais académiques, fournie par la faculté — à coller ci-dessous
+                        (un matricule par ligne, ou séparés par virgule/espace).
+                    </p>
+                    <textarea id="votersImportText" rows="5" placeholder="MAT10001&#10;MAT10002&#10;MAT10003"
+                        class="w-full px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-lg text-sm font-mono text-slate-200 outline-none focus:ring-1 focus:ring-indigo-500"></textarea>
+                    <div id="votersImportResult" class="hidden mt-2 text-xs"></div>
+                    <button onclick="importAuthorizedVoters()" class="mt-3 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-lg transition-all">
+                        <i class="fa-solid fa-file-import mr-2"></i>Importer dans le registre
+                    </button>
+                </div>
+
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-sm font-bold text-indigo-400">
+                            <span id="votersCount">0</span> électeur(s) autorisé(s)
+                        </h3>
+                        <button onclick="loadAuthorizedVoters()" class="px-3 py-2 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 rounded-lg text-xs transition-all">
+                            <i class="fa-solid fa-rotate mr-1"></i> Actualiser
+                        </button>
+                    </div>
+                    <div id="votersList" class="flex flex-wrap gap-2 font-mono text-xs"></div>
+                </div>
+            </div>
+
             <!-- Journal de fraude -->
             <div id="panel-fraud" class="hidden space-y-6">
                 <div class="bg-slate-900 border border-rose-500/30 rounded-2xl p-6">
@@ -136,9 +171,14 @@
                         <h2 class="text-xl font-semibold text-rose-400 flex items-center gap-2">
                             <i class="fa-solid fa-triangle-exclamation"></i> Journal de Fraude
                         </h2>
-                        <button onclick="loadFraudLog()" class="px-3 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 rounded-lg text-xs transition-all">
-                            <i class="fa-solid fa-rotate mr-1"></i> Actualiser
-                        </button>
+                        <div class="flex gap-2">
+                            <button onclick="exportCsv('fraud-log', 'journal_fraude.csv')" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded-lg text-xs transition-all">
+                                <i class="fa-solid fa-file-csv mr-1"></i> Export CSV
+                            </button>
+                            <button onclick="loadFraudLog()" class="px-3 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 rounded-lg text-xs transition-all">
+                                <i class="fa-solid fa-rotate mr-1"></i> Actualiser
+                            </button>
+                        </div>
                     </div>
                     <p class="text-xs text-slate-400 mb-4">Chaque tentative d'un matricule ayant déjà voté est journalisée ici pour détecter les fraudes.</p>
                     <div id="fraudLogList" class="space-y-2"></div>
@@ -152,9 +192,14 @@
                         <h2 class="text-xl font-semibold text-white flex items-center gap-2">
                             <i class="fa-solid fa-receipt text-indigo-400"></i> Reçus de Vote (Anonymisés)
                         </h2>
-                        <button onclick="loadReceipts()" class="px-3 py-2 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 rounded-lg text-xs transition-all">
-                            <i class="fa-solid fa-rotate mr-1"></i> Actualiser
-                        </button>
+                        <div class="flex gap-2">
+                            <button onclick="exportCsv('receipts', 'recus_vote.csv')" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded-lg text-xs transition-all">
+                                <i class="fa-solid fa-file-csv mr-1"></i> Export CSV
+                            </button>
+                            <button onclick="loadReceipts()" class="px-3 py-2 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 rounded-lg text-xs transition-all">
+                                <i class="fa-solid fa-rotate mr-1"></i> Actualiser
+                            </button>
+                        </div>
                     </div>
                     <p class="text-xs text-slate-400 mb-4">Le matricule est haché (SHA-256) : impossible de relier un reçu à une identité, mais chaque électeur peut vérifier que son vote a bien été déposé.</p>
                     <div id="receiptsList" class="space-y-2 font-mono text-xs"></div>
@@ -248,7 +293,7 @@
         });
 
         function switchTab(tab) {
-            ['results', 'candidates', 'fraud', 'receipts', 'schedule'].forEach(t => {
+            ['results', 'candidates', 'voters', 'fraud', 'receipts', 'schedule'].forEach(t => {
                 document.getElementById(`panel-${t}`).classList.add('hidden');
                 document.getElementById(`tab-${t}`).className = "px-4 py-2 text-sm font-medium rounded-lg text-slate-400 hover:text-slate-200 transition-all";
             });
@@ -257,9 +302,61 @@
 
             if (tab === 'results') loadResults();
             if (tab === 'candidates') loadCandidatesManage();
+            if (tab === 'voters') loadAuthorizedVoters();
             if (tab === 'fraud') loadFraudLog();
             if (tab === 'receipts') loadReceipts();
             if (tab === 'schedule') loadSchedule();
+        }
+
+        async function loadAuthorizedVoters() {
+            const res = await fetch(`${API_URL}/admin/authorized-voters`, { headers: authHeaders() });
+            if (!res.ok) { logout(); return; }
+            const data = await res.json();
+            document.getElementById('votersCount').innerText = data.count;
+            const list = document.getElementById('votersList');
+            if (data.matricules.length === 0) {
+                list.innerHTML = `<p class="text-slate-500 text-xs font-sans">Registre vide — aucun électeur ne peut encore voter.</p>`;
+                return;
+            }
+            list.innerHTML = data.matricules.map(m => `
+                <span class="inline-flex items-center gap-2 px-2.5 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-slate-300">
+                    ${m}
+                    <button onclick="removeAuthorizedVoter('${m}')" class="text-rose-400 hover:text-rose-300"><i class="fa-solid fa-xmark"></i></button>
+                </span>
+            `).join('');
+        }
+
+        async function importAuthorizedVoters() {
+            const text = document.getElementById('votersImportText').value;
+            const resultBox = document.getElementById('votersImportResult');
+            if (!text.trim()) return;
+
+            const res = await fetch(`${API_URL}/admin/authorized-voters`, {
+                method: 'POST',
+                headers: authHeaders(),
+                body: JSON.stringify({ matricules: text })
+            });
+            const data = await res.json();
+            resultBox.classList.remove('hidden');
+            if (res.ok) {
+                let msg = `<span class="text-emerald-400">${data.added} matricule(s) ajouté(s).</span>`;
+                if (data.rejected.length > 0) {
+                    msg += ` <span class="text-rose-400">${data.rejected.length} rejeté(s) (format invalide) : ${data.rejected.join(', ')}</span>`;
+                }
+                resultBox.innerHTML = msg;
+                document.getElementById('votersImportText').value = "";
+                loadAuthorizedVoters();
+            } else {
+                resultBox.innerHTML = `<span class="text-rose-400">${data.detail || "Erreur lors de l'import."}</span>`;
+            }
+        }
+
+        async function removeAuthorizedVoter(matricule) {
+            const res = await fetch(`${API_URL}/admin/authorized-voters/${matricule}`, {
+                method: 'DELETE',
+                headers: authHeaders()
+            });
+            if (res.ok) loadAuthorizedVoters();
         }
 
         async function loadResults() {
@@ -425,6 +522,20 @@
                 headers: authHeaders()
             });
             if (res.ok) loadCandidatesManage();
+        }
+
+        async function exportCsv(endpoint, filename) {
+            const res = await fetch(`${API_URL}/admin/${endpoint}/export`, { headers: authHeaders() });
+            if (!res.ok) { alert("Erreur lors de l'export."); return; }
+            const blob = await res.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
         }
 
         async function loadFraudLog() {
